@@ -58,3 +58,4 @@
 # Ignore VSCode LaTeX Workshop's temp file.
 __latexindent_temp.tex
 .vscode/
+.icloud
