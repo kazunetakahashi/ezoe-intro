@@ -8,7 +8,8 @@ class array_iterator
 
 public:
   array_iterator(Array &a, typename Array::size_type i) : a{a}, i{i} {}
-  typename Array::reference operator*() { a[i]; }
+  typename Array::reference operator*() { return a[i]; }
+  typename Array::reference operator[](typename Array::size_type i) const { return *(*this + i); }
   array_iterator &operator++();
   array_iterator &operator++(int);
   array_iterator &operator--();
@@ -17,6 +18,12 @@ public:
   array_iterator operator+(typename Array::size_type n) const;
   array_iterator &operator-=(typename Array::size_type n);
   array_iterator operator-(typename Array::size_type n) const;
+  bool operator==(array_iterator const &right) const;
+  bool operator!=(array_iterator const &right) const;
+  bool operator<(array_iterator const &right) const;
+  bool operator<=(array_iterator const &right) const;
+  bool operator>(array_iterator const &right) const;
+  bool operator>=(array_iterator const &right) const;
 };
 
 template <typename Array>
@@ -69,6 +76,144 @@ array_iterator<Array> array_iterator<Array>::operator-(typename Array::size_type
   copy -= n;
   return copy;
 }
+template <typename Array>
+bool array_iterator<Array>::operator==(array_iterator const &right) const
+{
+  return i == right.i;
+}
+template <typename Array>
+bool array_iterator<Array>::operator!=(array_iterator const &right) const
+{
+  return i != right.i;
+}
+template <typename Array>
+bool array_iterator<Array>::operator<(array_iterator const &right) const
+{
+  return i < right.i;
+}
+template <typename Array>
+bool array_iterator<Array>::operator<=(array_iterator const &right) const
+{
+  return i <= right.i;
+}
+template <typename Array>
+bool array_iterator<Array>::operator>(array_iterator const &right) const
+{
+  return i > right.i;
+}
+template <typename Array>
+bool array_iterator<Array>::operator>=(array_iterator const &right) const
+{
+  return i >= right.i;
+}
+
+template <typename Array>
+class array_const_iterator
+{
+  Array &a;
+  typename Array::size_type i;
+
+public:
+  array_const_iterator(Array &a, typename Array::size_type i) : a{a}, i{i} {}
+  array_const_iterator(typename array_iterator<Array>::iterator const &it) : a{it.a}, i{it.i} {}
+  typename Array::const_reference operator*() const { return a[i]; }
+  typename Array::const_reference operator[](typename Array::size_type i) const { return *(*this + i); }
+  array_const_iterator &operator++();
+  array_const_iterator &operator++(int);
+  array_const_iterator &operator--();
+  array_const_iterator &operator--(int);
+  array_const_iterator &operator+=(typename Array::size_type n);
+  array_const_iterator operator+(typename Array::size_type n) const;
+  array_const_iterator &operator-=(typename Array::size_type n);
+  array_const_iterator operator-(typename Array::size_type n) const;
+  bool operator==(array_const_iterator const &right) const;
+  bool operator!=(array_const_iterator const &right) const;
+  bool operator<(array_const_iterator const &right) const;
+  bool operator<=(array_const_iterator const &right) const;
+  bool operator>(array_const_iterator const &right) const;
+  bool operator>=(array_const_iterator const &right) const;
+};
+
+template <typename Array>
+array_const_iterator<Array> &array_const_iterator<Array>::operator++()
+{
+  ++i;
+}
+template <typename Array>
+array_const_iterator<Array> &array_const_iterator<Array>::operator++(int)
+{
+  array_const_iterator copy{*this};
+  ++*this;
+  return copy;
+}
+template <typename Array>
+array_const_iterator<Array> &array_const_iterator<Array>::operator--()
+{
+  --i;
+}
+template <typename Array>
+array_const_iterator<Array> &array_const_iterator<Array>::operator--(int)
+{
+  array_const_iterator copy{*this};
+  --*this;
+  return copy;
+}
+template <typename Array>
+array_const_iterator<Array> &array_const_iterator<Array>::operator+=(typename Array::size_type n)
+{
+  i += n;
+  return *this;
+}
+template <typename Array>
+array_const_iterator<Array> array_const_iterator<Array>::operator+(typename Array::size_type n) const
+{
+  array_const_iterator copy{*this};
+  copy += n;
+  return copy;
+}
+template <typename Array>
+array_const_iterator<Array> &array_const_iterator<Array>::operator-=(typename Array::size_type n)
+{
+  i -= n;
+  return *this;
+}
+template <typename Array>
+array_const_iterator<Array> array_const_iterator<Array>::operator-(typename Array::size_type n) const
+{
+  array_const_iterator copy{*this};
+  copy -= n;
+  return copy;
+}
+template <typename Array>
+bool array_const_iterator<Array>::operator==(array_const_iterator const &right) const
+{
+  return i == right.i;
+}
+template <typename Array>
+bool array_const_iterator<Array>::operator!=(array_const_iterator const &right) const
+{
+  return i != right.i;
+}
+template <typename Array>
+bool array_const_iterator<Array>::operator<(array_const_iterator const &right) const
+{
+  return i < right.i;
+}
+template <typename Array>
+bool array_const_iterator<Array>::operator<=(array_const_iterator const &right) const
+{
+  return i <= right.i;
+}
+template <typename Array>
+bool array_const_iterator<Array>::operator>(array_const_iterator const &right) const
+{
+  return i > right.i;
+}
+template <typename Array>
+bool array_const_iterator<Array>::operator>=(array_const_iterator const &right) const
+{
+  return i >= right.i;
+}
 
 template <typename T, std::size_t N>
 class array
@@ -79,6 +224,7 @@ public:
   using const_reference = T const &;
   using size_type = std::size_t;
   using iterator = array_iterator<array>;
+  using const_iterator = array_const_iterator<array>;
 
   value_type storage[N];
 
@@ -95,8 +241,12 @@ public:
   const_reference front() const { return storage[0]; }
   reference back() { return back[N - 1]; }
   const_reference back() const { return back[N - 1]; }
-  iterator begin() { return array_iterator{*this, 0}; }
-  iterator end() { return array_iterator{*this, N}; }
+  iterator begin() { return iterator{*this, 0}; }
+  iterator end() { return iterator{*this, N}; }
+  const_iterator begin() const { return const_iterator{*this, 0}; }
+  const_iterator end() const { return const_iterator{*this, N}; }
+  const_iterator cbegin() const { return const_iterator{*this, 0}; }
+  const_iterator cend() const { return const_iterator{*this, N}; }
 };
 
 template <typename T, std::size_t N>
