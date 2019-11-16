@@ -228,14 +228,10 @@ public:
 
   value_type storage[N];
 
-  reference operator[](size_type i)
-  {
-    return storage[i];
-  }
-  const_reference operator[](size_type i) const
-  {
-    return storage[i];
-  }
+  reference operator[](size_type i) { return storage[i]; }
+  const_reference operator[](size_type i) const { return storage[i]; }
+  reference at(size_type i);
+  const_reference at(size_type i) const;
   size_type size() const;
   reference front() { return storage[0]; }
   const_reference front() const { return storage[0]; }
@@ -248,6 +244,26 @@ public:
   const_iterator cbegin() const { return const_iterator{*this, 0}; }
   const_iterator cend() const { return const_iterator{*this, N}; }
 };
+
+template <typename T, std::size_t N>
+typename array<T, N>::reference array<T, N>::at(typename array<T, N>::size_type i)
+{
+  if (i >= size())
+  {
+    throw std::out_of_range("Error: Out of Range");
+  }
+  return storage[i];
+}
+
+template <typename T, std::size_t N>
+typename array<T, N>::const_reference array<T, N>::at(typename array<T, N>::size_type i) const
+{
+  if (i >= this->size())
+  {
+    throw std::out_of_range("Error: Out of Range");
+  }
+  return storage[i];
+}
 
 template <typename T, std::size_t N>
 typename array<T, N>::size_type array<T, N>::size() const
