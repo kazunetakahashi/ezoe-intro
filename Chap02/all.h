@@ -11,7 +11,6 @@
 #include <typeinfo>
 #include <exception>
 #include <initializer_list>
-#include <cstdalign>
 #include <stdexcept>
 #include <cassert>
 #include <cerrno>
