@@ -52,6 +52,63 @@ vector<T, Allocator>::~vector()
 }
 
 template <typename T, typename Allocator>
+vector<T, Allocator>::vector(vector const &r) : vector{vector<T, Allocator>::traits::select_on_container_copy_construction(r.alloc)}
+{
+  reserve(r.size());
+  for (auto dst = first, src = r.begin(), last = r.end(); src != last; ++dst, ++src)
+  {
+    construct(dst, *src);
+  }
+  last = first + r.size();
+}
+
+template <typename T, typename Allocator>
+vector<T, Allocator> &vector<T, Allocator>::operator=(vector<T, Allocator> const &r)
+{
+  if (this == &r)
+  {
+    return *this;
+  }
+  if (size() == r.size())
+  {
+    std::copy(r.begin(), r.end(), begin());
+  }
+  else if (capacity() >= r.size())
+  {
+    if (size() <= r.size())
+    {
+      std::copy(r.begin(), r.begin() + size(), begin());
+      for (auto src_iter = r.begin() + size(), src_end = r.end(); src_iter != src_end; ++src_iter, ++last)
+      {
+        construct(last, *src_iter);
+      }
+    }
+    else
+    {
+      std::copy(r.begin(), r.end(), begin());
+      resize(r.size());
+    }
+  }
+  else
+  {
+    clear();
+    reserve(r.size());
+    for (auto src_iter = r.begin(), src_end = r.end(), dest_iter = begin(); src_iter != src_end; ++src_iter, ++dest_iter, ++last)
+    {
+      construct(dest_iter, *src_iter);
+    }
+  }
+  return *this;
+}
+
+template <typename T, typename Allocator>
+void vector<T, Allocator>::clear() noexcept
+{
+  destroy_until(rend());
+  last = first;
+}
+
+template <typename T, typename Allocator>
 void vector<T, Allocator>::reserve(typename vector<T, Allocator>::size_type sz)
 {
   if (sz <= capacity())
@@ -88,7 +145,7 @@ void vector<T, Allocator>::resize(typename vector<T, Allocator>::size_type sz)
   else if (sz > size())
   {
     reserve(sz);
-    for (; last != reserved_last; ++last)
+    for (; last != first + sz; ++last)
     {
       construct(last);
     }
@@ -107,7 +164,7 @@ void vector<T, Allocator>::resize(typename vector<T, Allocator>::size_type sz, t
   else if (sz > size())
   {
     reserve(sz);
-    for (; last != reserved_last; ++last)
+    for (; last != first + sz; ++last)
     {
       construct(last, value);
     }

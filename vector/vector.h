@@ -58,14 +58,18 @@ public:
   vector() : vector(allocator_type{}) {}
   vector(size_type size, allocator_type const &alloc = allocator_type{});
   vector(size_type size, const_reference value, allocator_type const &alloc = allocator_type{});
-  template <typename InputIter, typename E = typename std::enable_if_t<std::is_pointer_v<InputIter>>>
+  template <typename InputIter, typename E = std::enable_if_t<std::is_pointer_v<InputIter>>>
   vector(InputIter first, InputIter last, allocator_type const &alloc = allocator_type{});
   vector(std::initializer_list<value_type> init, allocator_type const &alloc = allocator_type{}) : vector(std::begin(init), std::end(init), alloc) {}
   // destructor
   ~vector();
+  // copy constructor
+  vector(vector const &r);
+  // copy assignment
+  vector &operator=(vector const &r);
 
   // memory
-  void clear() noexcept { destroy_until(rend()); }
+  void clear() noexcept;
   void reserve(size_type sz);
   void resize(size_type sz);
   void resize(size_type sz, const_reference value);
